@@ -2,22 +2,5 @@ import { useCart } from '../../context/CartContext';
 import type { CartItem } from '../../data/cart';
 import { PriceLabel } from '../PriceLabel';
 import { QuantityControl } from './QuantityControl';
-
-function CartRow({ item }: { item: CartItem }) {
-  const { updateQuantity, removeItem } = useCart();
-  return <div className="grid min-h-[150px] grid-cols-[426px_126px_276px_276px] items-center gap-[24px] border-t border-xam20">
-    <div className="flex items-center gap-[24px]"><img className="h-[126px] w-[126px] object-contain" src={item.image} /><div className="min-w-0"><p className="text-[18px] font-medium leading-[1.1]">{item.name}</p>{item.variant && <p className="mt-[6px] text-[14px] text-xam">{item.variant}</p>}{item.gift && <div className="mt-[6px]"><p className="text-[14px] leading-none text-xam">Tặng:</p><div className="mt-[6px] flex items-center gap-[8px]"><img className="size-[40px] rounded-full object-contain" src={item.gift.image} /><span className="text-[16px] leading-[1.16]">{item.gift.name}</span></div></div>}</div></div>
-    <div className="flex justify-center"><QuantityControl quantity={item.quantity} onChange={quantity => updateQuantity(item.id, quantity)} /></div>
-    <PriceLabel className="text-center text-[16px] font-bold" />
-    <div className="flex items-center justify-center gap-[10px]"><PriceLabel className="text-[16px] font-bold text-red" /><button aria-label={`Xóa ${item.name}`} className="text-[14px] text-xam underline" onClick={() => removeItem(item.id)}>Xóa</button></div>
-  </div>;
-}
-
-export function CartTable() {
-  const { items } = useCart();
-  if (!items.length) return <div className="flex h-[200px] items-center justify-center rounded-[8px] border border-xam20 bg-white text-xam">Giỏ hàng của bạn đang trống.</div>;
-  return <section className="w-[1176px] overflow-hidden rounded-[8px] border border-xam20 bg-white">
-    <div className="grid h-[50px] grid-cols-[426px_126px_276px_276px] items-center gap-[24px] text-center text-[16px] font-bold text-xam"><span>Sản phẩm</span><span>Số lượng</span><span>Giá bán</span><span>Thành tiền</span></div>
-    {items.map(item => <CartRow key={item.id} item={item} />)}
-  </section>;
-}
+function CartRow({ item }: { item: CartItem }) { const { updateQuantity, removeItem } = useCart(); return <div className="grid gap-3 border-t border-xam20 p-3 md:grid-cols-[minmax(0,1fr)_126px_120px_140px] md:items-center md:gap-6 xl:min-h-[150px]"><div className="flex min-w-0 items-center gap-3 xl:gap-6"><img className="size-20 shrink-0 object-contain xl:size-[126px]" src={item.image} alt="" /><div className="min-w-0"><p className="text-sm font-medium xl:text-[18px]">{item.name}</p>{item.variant && <p className="mt-1 text-sm text-xam">{item.variant}</p>}{item.gift && <p className="mt-1 break-words text-xs text-xam">Tặng: {item.gift.name}</p>}</div></div><div className="flex items-center justify-between gap-2 md:justify-center"><span className="md:hidden">Số lượng</span><QuantityControl quantity={item.quantity} onChange={quantity => updateQuantity(item.id, quantity)} /></div><div className="flex justify-between md:justify-center"><span className="md:hidden">Giá bán</span><PriceLabel className="text-sm font-bold xl:text-[16px]" /></div><div className="flex items-center justify-between gap-2 md:justify-center"><PriceLabel className="text-sm font-bold text-red xl:text-[16px]" /><button aria-label={`Xóa ${item.name}`} className="min-h-11 text-sm text-xam underline" onClick={() => removeItem(item.id)}>Xóa</button></div></div>; }
+export function CartTable() { const { items } = useCart(); if (!items.length) return <div className="flex h-[200px] items-center justify-center rounded-[8px] border border-xam20 bg-white text-xam">Giỏ hàng của bạn đang trống.</div>; return <section className="w-full overflow-hidden rounded-[8px] border border-xam20 bg-white xl:w-[1176px]"><div className="hidden h-[50px] grid-cols-[minmax(0,1fr)_126px_120px_140px] items-center gap-6 text-center text-[16px] font-bold text-xam md:grid"><span>Sản phẩm</span><span>Số lượng</span><span>Giá bán</span><span>Thành tiền</span></div>{items.map(item => <CartRow key={item.id} item={item} />)}</section>; }

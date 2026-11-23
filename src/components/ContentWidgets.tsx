@@ -5,9 +5,9 @@ import { useSeo } from '../lib/seo';
 export function ChatBubbles() {
   const site = useSite();
   const url = (value?: string | null) => value || '/lien-he';
-  return <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3" aria-label="Liên hệ nhanh">
-    <a aria-label="Chat Zalo" target="_blank" rel="noopener noreferrer" href={url(site.data?.zaloUrl)} className="rounded-full bg-blue-600 px-4 py-3 text-white shadow-lg">Zalo</a>
-    <a aria-label="Chat Facebook Messenger" target="_blank" rel="noopener noreferrer" href={url(site.data?.messengerUrl)} className="rounded-full bg-blue-700 px-4 py-3 text-white shadow-lg">Messenger</a>
+  return <div className="fixed bottom-4 right-4 z-40 flex flex-col gap-3 md:bottom-6 md:right-6" aria-label="Liên hệ nhanh">
+    <a aria-label="Chat Zalo" target="_blank" rel="noopener noreferrer" href={url(site.data?.zaloUrl)} className="grid size-12 place-items-center rounded-full bg-blue-600 text-xs font-bold text-white shadow-lg md:block md:size-auto md:px-4 md:py-3 md:text-base">Z<span className="hidden md:inline">alo</span></a>
+    <a aria-label="Chat Facebook Messenger" target="_blank" rel="noopener noreferrer" href={url(site.data?.messengerUrl)} className="grid size-12 place-items-center rounded-full bg-blue-700 text-xs font-bold text-white shadow-lg md:block md:size-auto md:px-4 md:py-3 md:text-base">M<span className="hidden md:inline">essenger</span></a>
   </div>;
 }
 

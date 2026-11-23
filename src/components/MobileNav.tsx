@@ -1,0 +1,10 @@
+import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { useSite } from '../lib/api';
+
+export function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const panel = useRef<HTMLElement>(null); const site = useSite();
+  useEffect(() => { if (!open) return; const previous = document.activeElement as HTMLElement | null; const key = (event: KeyboardEvent) => { if (event.key === 'Escape') return onClose(); if (event.key !== 'Tab' || !panel.current) return; const items = Array.from(panel.current.querySelectorAll<HTMLElement>('button, a[href]')); const index = items.indexOf(document.activeElement as HTMLElement); event.preventDefault(); items[(index + (event.shiftKey ? items.length - 1 : 1)) % items.length].focus(); }; window.addEventListener('keydown', key); panel.current?.querySelector<HTMLElement>('button')?.focus(); return () => { window.removeEventListener('keydown', key); previous?.focus(); }; }, [open, onClose]);
+  if (!open) return null;
+  return <div className="fixed inset-0 z-50 bg-black/40 xl:hidden" onMouseDown={onClose}><aside ref={panel} role="dialog" aria-modal="true" aria-label="Menu" onMouseDown={event => event.stopPropagation()} className="h-full w-[85%] overflow-y-auto bg-white p-4"><div className="mb-6 flex justify-between"><b className="font-chakra text-2xl">Danh mục</b><button type="button" onClick={onClose} aria-label="Đóng menu" className="grid size-11 place-items-center text-2xl">×</button></div><nav className="flex flex-col"><Link onClick={onClose} className="min-h-11 border-b py-3 font-bold" to="/danh-muc">Tất cả sản phẩm</Link><Link onClick={onClose} className="min-h-11 border-b py-3" to="/gioi-thieu">Giới thiệu</Link><Link onClick={onClose} className="min-h-11 border-b py-3" to="/lien-he">Liên hệ</Link><Link onClick={onClose} className="min-h-11 border-b py-3" to="/dang-nhap">Tài khoản / Đăng nhập</Link></nav><div className="mt-6 space-y-2 text-sm"><b>Hotline</b>{(site.data?.hotlines ?? []).flatMap(item => item.numbers).map(number => <p key={number}>{number}</p>)}</div></aside></div>;
+}

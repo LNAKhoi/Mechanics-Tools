@@ -4,20 +4,22 @@
 
 @layer base {
   * { box-sizing: border-box; }
-  html { min-width: 1920px; background: #fbfbfb; }
+  html { background: #fbfbfb; }
   body { margin: 0; color: #1f1f1e; background: #fbfbfb; font-family: 'Space Grotesk', sans-serif; }
   button, input { font: inherit; }
   button { cursor: pointer; }
 }
 
 @layer components {
-  .page-container { width: 1776px; margin-inline: auto; }
+  .page-container { width: 100%; max-width: 1776px; margin-inline: auto; padding-inline: 16px; }
+  @media (min-width: 768px) { .page-container { padding-inline: 24px; } }
+  @media (min-width: 1280px) { .page-container { padding-inline: 0; } }
   .icon { display: block; width: 24px; height: 24px; object-fit: contain; }
   .rule { height: 1px; background: rgba(111, 113, 118, .2); }
 }
 
 /* The checkout composition is a centered 1452px pair of cards. */
-main [class~="w-[726px]"] { width: 714px; }
+@media (min-width: 1280px) { main [class~="w-[726px]"] { width: 714px; } }
 
 /* Product-detail carousel controls from the supplied product icon set. */
 main section[class*="mt-[24px]"][class*="border-t"] { position: relative; }
@@ -33,6 +35,17 @@ main section[class*="mt-[24px]"][class*="border-t"]::after {
   background-position: center;
   background-size: 24px;
 }
+
+@media (max-width: 1279px) {
+  main { overflow-x: clip; }
+  [class~="px-[72px]"] { padding-left: 16px; padding-right: 16px; }
+  [class~="w-[1476px]"], [class~="w-[1176px]"], [class~="w-[876px]"], [class~="w-[726px]"], [class~="w-[576px]"] { width: 100%; max-width: 100%; }
+  [class~="h-[726px]"] { height: auto; }
+}
+@media (min-width: 768px) and (max-width: 1279px) { [class~="px-[72px]"] { padding-left: 24px; padding-right: 24px; } }
+
+/* Home hero keeps the supplied desktop banner ratio before the desktop layout takes over. */
+@media (max-width: 1279px) { main [class~="h-[250px]"] { height: auto; aspect-ratio: 1476 / 404; } }
 
 .admin-shell, .admin-login { min-width: 0; max-width: 1200px; margin: 32px auto; padding: 24px; font-family: system-ui, sans-serif; }
 .admin-shell nav { display: flex; gap: 16px; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 16px; margin-bottom: 24px; }
