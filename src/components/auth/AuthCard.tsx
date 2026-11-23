@@ -1,0 +1,7 @@
+import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
+
+export function BackHomeLink() { return <Link className="flex w-[576px] items-center gap-[8px] text-[14px] font-medium leading-none text-red underline" to="/"><img className="h-[24px] w-[24px]" src="/assets/login/43328.svg" alt="" />Quay trở lại trang chủ</Link>; }
+export function AuthCard({ title, children }: { title: string; children: ReactNode }) { return <section className="w-[576px] rounded-[8px] border border-xam20 bg-white p-[12px] shadow-[0_2px_16px_rgba(0,0,0,.08)]"><h1 className="font-chakra text-center text-[28px] font-bold leading-none text-den">{title}</h1>{children}</section>; }
+export function AuthSubmit({ children }: { children: ReactNode }) { return <button className="h-[40px] w-full rounded-[6px] bg-red px-[12px] py-[6px] text-[14px] font-medium leading-none text-white" type="submit">{children}</button>; }
+export function TermsAndSignIn() { return <><p className="w-[459px] text-center text-[12px] leading-none text-den">Bằng việc đăng ký, bạn đã đồng ý với KNTD về <a className="underline" href="#terms">Điều khoản dịch vụ</a> &amp; <a className="underline" href="#privacy">Chính sách bảo mật</a></p><div className="h-px w-[365px] bg-xam20" /><p className="text-center text-[14px] font-medium leading-none text-den">Bạn đã có tài khoản? <Link className="text-red underline" to="/dang-nhap">Đăng nhập</Link></p></>; }

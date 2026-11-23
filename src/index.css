@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { min-width: 1920px; background: #fbfbfb; }
+  body { margin: 0; color: #1f1f1e; background: #fbfbfb; font-family: 'Space Grotesk', sans-serif; }
+  button, input { font: inherit; }
+  button { cursor: pointer; }
+}
+
+@layer components {
+  .page-container { width: 1776px; margin-inline: auto; }
+  .icon { display: block; width: 24px; height: 24px; object-fit: contain; }
+  .rule { height: 1px; background: rgba(111, 113, 118, .2); }
+}
+
+/* The checkout composition is a centered 1452px pair of cards. */
+main [class~="w-[726px]"] { width: 714px; }
+
+/* Product-detail carousel controls from the supplied product icon set. */
+main section[class*="mt-[24px]"][class*="border-t"] { position: relative; }
+main section[class*="mt-[24px]"][class*="border-t"]::before,
+main section[class*="mt-[24px]"][class*="border-t"]::after {
+  content: '';
+  position: absolute;
+  top: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 24px;
+}
+main section[class*="mt-[24px]"][class*="border-t"]::before {
+  right: 64px;
+  border: 1.5px solid rgba(111, 113, 118, .2);
+  background-color: rgba(111, 113, 118, .06);
+  background-image: url('/assets/product/2312c.svg');
+}
+main section[class*="mt-[24px]"][class*="border-t"]::after {
+  right: 0;
+  background-color: #d70114;
+  background-image: url('/assets/product/7b2ed.svg');
+}
