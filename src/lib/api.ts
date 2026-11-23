@@ -8,6 +8,10 @@ export type ProductSpec = { label: string; value: string };
 export type ProductDetail = ProductSummary & { sku: string; description: string; specs: ProductSpec[]; stock: number; images: string[] };
 export type ProductPage = { items: ProductSummary[]; total: number; page: number; limit: number };
 export type ProductQuery = { q?: string; category?: string; page?: number; limit?: number };
+export type ContentBanner = { id: number; title: string; imageUrl: string; linkUrl: string | null; placement: 'hero' | 'business'; sortOrder: number; isEnabled: boolean };
+export type ContentPage = { slug: string; title: string; html: string };
+export type SiteSettings = { address: string; hotlines: { label: string; numbers: string[] }[]; email: string; zaloUrl: string | null; messengerUrl: string | null; mapEmbedUrl: string; stores: { name: string; address: string }[] };
+export type Popup = { title: string; html: string; imageUrl: string | null; linkUrl: string | null; version: number };
 
 /** Shown when a product has no images. An existing public asset (LEE's tools logo). */
 export const PLACEHOLDER_IMAGE = '/assets/home/f0977.png';
@@ -36,6 +40,10 @@ export const api = {
     return getJson<ProductPage>(`/api/products${search ? `?${search}` : ''}`, signal);
   },
   product: (slug: string, signal?: AbortSignal) => getJson<ProductDetail>(`/api/products/${encodeURIComponent(slug)}`, signal),
+  banners: (signal?: AbortSignal) => getJson<{ items: ContentBanner[] }>('/api/content/banners', signal).then(x => x.items),
+  page: (slug: string, signal?: AbortSignal) => getJson<ContentPage>(`/api/content/pages/${slug}`, signal),
+  site: (signal?: AbortSignal) => getJson<SiteSettings>('/api/content/site', signal),
+  popup: (signal?: AbortSignal) => getJson<Popup | null>('/api/content/popup', signal),
 };
 
 export type AsyncState<T> = { data: T | undefined; error: Error | undefined; loading: boolean; retry: () => void };
@@ -67,3 +75,7 @@ export function useApi<T>(key: string, load: (signal: AbortSignal) => Promise<T>
 export const useCategories = () => useApi('categories', signal => api.categories(signal));
 export const useProducts = (query: ProductQuery = {}) => useApi(`products:${JSON.stringify(query)}`, signal => api.products(query, signal));
 export const useProduct = (slug: string) => useApi(`product:${slug}`, signal => api.product(slug, signal));
+export const useContentBanners = () => useApi('content-banners', signal => api.banners(signal));
+export const useContentPage = (slug: string) => useApi(`content-page:${slug}`, signal => api.page(slug, signal));
+export const useSite = () => useApi('content-site', signal => api.site(signal));
+export const usePopup = () => useApi('content-popup', signal => api.popup(signal));

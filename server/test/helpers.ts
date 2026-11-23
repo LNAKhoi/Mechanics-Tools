@@ -1,11 +1,12 @@
 import { prisma } from '../src/db.js';
-import { seedCatalogInto, seedRolesInto } from '../prisma/seed-data.js';
+import { seedCatalogInto, seedContentInto, seedRolesInto } from '../prisma/seed-data.js';
 
 /** Empties every table and re-seeds roles and the catalog. */
 export async function resetDatabase() {
-  await prisma.$executeRawUnsafe('TRUNCATE "Session", "AdminUser", "Role", "ProductImage", "Product", "Category" RESTART IDENTITY CASCADE');
+  await prisma.$executeRawUnsafe('TRUNCATE "Session", "AdminUser", "Role", "ProductImage", "Product", "Category", "Banner", "Page", "SiteSettings", "Popup" RESTART IDENTITY CASCADE');
   await seedRolesInto(prisma);
   await seedCatalogInto(prisma);
+  await seedContentInto(prisma);
 }
 
 /** Recursively checks that no object anywhere in a JSON value has a `price` key. */

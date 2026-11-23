@@ -65,6 +65,10 @@ Public (no `price` in any response):
 | `GET /api/categories` | Categories in display order, with `productCount` |
 | `GET /api/products?q=&category=&page=&limit=` | `q` matches name, brand or SKU (case-insensitive); unknown category gives an empty list |
 | `GET /api/products/:slug` | Detail with images, specs and stock; 404 JSON if missing |
+| `GET /api/content/banners` | Enabled homepage banners, in display order |
+| `GET /api/content/pages/:slug` | Public About (`gioi-thieu`) or Contact (`lien-he`) page |
+| `GET /api/content/site` | Store, hotline, contact and chat-link settings |
+| `GET /api/content/popup` | Enabled popup inside its configured schedule, otherwise `null` |
 
 Admin (HTTP-only `lee_admin_session` cookie, valid 7 days):
 
@@ -76,11 +80,13 @@ Admin (HTTP-only `lee_admin_session` cookie, valid 7 days):
 | `GET`/`POST /api/admin/products`, `GET`/`PUT`/`DELETE /api/admin/products/:id` | `products:write` |
 | `GET`/`POST /api/admin/categories`, `PUT`/`DELETE /api/admin/categories/:id` | `categories:write` (a category with products cannot be deleted) |
 | `POST /api/admin/uploads` | `products:write`; PNG/JPEG/WebP request body, maximum 5 MB; saves a generated name in `server/uploads` |
+| `GET`/`POST`/`PUT`/`DELETE /api/admin/content/banners...` | `content:write` |
+| `GET`/`PUT /api/admin/content/pages/:slug`, `/site`, `/popup` | `content:write`; HTML is sanitized on save and each popup save increments its version |
 | `GET /api/admin/users`, `GET /api/admin/roles`, `POST /api/admin/users/:id/deactivate` | super-admin only; deactivation removes all sessions immediately |
 
 `PUT` is a partial update: send only the fields to change, and omitted fields keep their values. Sending `images` replaces the whole image list. Image URLs must start with `/assets/` or `/uploads/`, or be http(s) URLs.
 
-Roles are data: `super_admin` has `*`, `product_manager` has `products:write` and `categories:write`.
+Roles are data: `super_admin` has `*`, `product_manager` has `products:write` and `categories:write`, and `content_editor` has `content:write`. Content editors can also use the verified image upload endpoint for banners and popups.
 
 ## Routes
 
@@ -96,6 +102,8 @@ Roles are data: `super_admin` has `*`, `product_manager` has `products:write` an
 | `/tai-khoan` | Account |
 | `/quan-tri/dang-nhap` | Protected administrator sign-in |
 | `/quan-tri` | Protected catalog management (prices shown only here) |
+| `/quan-tri/noi-dung` | Protected banner, page, contact and popup management |
+| `/gioi-thieu`, `/lien-he` | Public About and Contact pages |
 
 ## Deploy on Vercel
 

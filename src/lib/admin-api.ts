@@ -3,6 +3,8 @@ export type AdminCategory = { id: number; slug: string; name: string; sortOrder:
 export type AdminProduct = { id: number; slug: string; name: string; brand: string; sku: string; description: string; price: number; stock: number; isBestseller: boolean; specs: { label: string; value: string }[]; images: string[]; category: { slug: string; name: string } };
 export type AdminUser = { id: number; email: string; name: string; role: string; isActive: boolean; createdAt: string };
 export type Role = { id: number; name: string; permissions: string[] };
+export type AdminBanner = { id: number; title: string; imageUrl: string; linkUrl: string | null; placement: 'hero' | 'business'; sortOrder: number; isEnabled: boolean };
+export type AdminPage = { slug: string; title: string; html: string };
 
 export class AdminApiError extends Error { constructor(public status: number, message: string, public fieldErrors?: Record<string, string[]>) { super(message); } }
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -16,4 +18,7 @@ export const adminApi = {
   categories: () => request<{ items: AdminCategory[] }>('/categories'), createCategory: (body: unknown) => request<AdminCategory>('/categories', { method: 'POST', body: JSON.stringify(body) }), updateCategory: (id: number, body: unknown) => request<AdminCategory>(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(body) }), deleteCategory: (id: number) => request<void>(`/categories/${id}`, { method: 'DELETE' }),
   upload: (image: File) => request<{ url: string }>('/uploads', { method: 'POST', body: image, headers: { 'Content-Type': image.type } }),
   users: () => request<{ items: AdminUser[] }>('/users'), roles: () => request<{ items: Role[] }>('/roles'), deactivate: (id: number) => request<void>(`/users/${id}/deactivate`, { method: 'POST' }),
+  contentBanners: () => request<{ items: AdminBanner[] }>('/content/banners'), createBanner: (body: unknown) => request<AdminBanner>('/content/banners', { method: 'POST', body: JSON.stringify(body) }), updateBanner: (id: number, body: unknown) => request<AdminBanner>(`/content/banners/${id}`, { method: 'PUT', body: JSON.stringify(body) }), deleteBanner: (id: number) => request<void>(`/content/banners/${id}`, { method: 'DELETE' }),
+  contentPage: (slug: string) => request<AdminPage>(`/content/pages/${slug}`), updateContentPage: (slug: string, body: unknown) => request<AdminPage>(`/content/pages/${slug}`, { method: 'PUT', body: JSON.stringify(body) }),
+  site: () => request<Record<string, unknown>>('/content/site'), updateSite: (body: unknown) => request<Record<string, unknown>>('/content/site', { method: 'PUT', body: JSON.stringify(body) }), popup: () => request<Record<string, unknown>>('/content/popup'), updatePopup: (body: unknown) => request<Record<string, unknown>>('/content/popup', { method: 'PUT', body: JSON.stringify(body) }),
 };

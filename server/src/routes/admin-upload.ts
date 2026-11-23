@@ -15,7 +15,7 @@ const imageType = (type: string | undefined, b: Buffer) => {
 
 export const adminUploadRouter = Router();
 adminUploadRouter.use(requireAdmin);
-adminUploadRouter.post('/uploads', requirePermission('products:write'), express.raw({ type: () => true, limit: '5mb' }), (req, res, next) => {
+adminUploadRouter.post('/uploads', (req, res, next) => (req.admin?.permissions.includes('*') || req.admin?.permissions.includes('products:write') || req.admin?.permissions.includes('content:write')) ? next() : res.status(403).json({ error: 'Không có quyền thực hiện thao tác này' }), express.raw({ type: () => true, limit: '5mb' }), (req, res, next) => {
   const bytes = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
   const extension = imageType(req.headers['content-type']?.split(';')[0], bytes);
   if (!extension) return void res.status(400).json({ error: 'Tệp ảnh không hợp lệ. Chỉ nhận PNG, JPEG hoặc WebP.' });

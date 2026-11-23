@@ -79,3 +79,49 @@ model Session {
 
   @@index([adminUserId])
 }
+
+model Banner {
+  id        Int      @id @default(autoincrement())
+  title     String
+  imageUrl  String
+  linkUrl   String?
+  placement String
+  sortOrder Int      @default(0)
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([placement, isEnabled, sortOrder])
+}
+
+model Page {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  title     String
+  html      String   @default("")
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSettings {
+  id             Int    @id @default(1)
+  address        String
+  hotlines       Json
+  email          String
+  zaloUrl        String?
+  messengerUrl   String?
+  mapEmbedUrl    String
+  stores         Json
+}
+
+model Popup {
+  id        Int      @id @default(1)
+  title     String
+  html      String   @default("")
+  imageUrl  String?
+  linkUrl   String?
+  isEnabled Boolean  @default(false)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  version   Int      @default(1)
+  updatedAt DateTime @updatedAt
+}

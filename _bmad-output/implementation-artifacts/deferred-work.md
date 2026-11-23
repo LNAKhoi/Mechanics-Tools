@@ -41,3 +41,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-phase3-admin-panel.md`
   summary: Run the generated verification-gap review lens once its instruction snapshot is readable to reviewers.
   evidence: The mandated verification reviewer could not read its generated instruction file because the sandbox denied access.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-phase4-content-management.md`
+  summary: Fill in the owner's real Zalo (https://zalo.me/...) and Facebook Messenger (https://m.me/...) links in /quan-tri once confirmed; until then the chat bubbles fall back to /lien-he.
+  evidence: Khoi 2026-11-23 has not yet obtained the owner's Zalo/Facebook; Phase 4 ships a temporary version with empty links.

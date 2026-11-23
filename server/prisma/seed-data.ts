@@ -76,6 +76,7 @@ export const seedProducts = [
 export const seedRoles = [
   { name: 'super_admin', permissions: ['*'] },
   { name: 'product_manager', permissions: ['products:write', 'categories:write'] },
+  { name: 'content_editor', permissions: ['content:write'] },
 ];
 
 /** Upserts roles. Safe to run repeatedly. */
@@ -100,4 +101,20 @@ export async function seedCatalogInto(prisma: PrismaClient) {
     if (await prisma.product.findUnique({ where: { slug: product.slug }, select: { id: true } })) continue;
     await prisma.product.create({ data: { ...data, images: { create: images.map((url, sortOrder) => ({ url, sortOrder })) } } });
   }
+}
+
+/** Creates content only for empty tables so staff edits and deletions survive reseeding. */
+export async function seedContentInto(prisma: PrismaClient) {
+  const banners = [
+    { title: 'DỤNG CỤ CHÍNH HÃNG', imageUrl: '/assets/home/763d1.png', linkUrl: '/danh-muc', placement: 'hero', sortOrder: 1 },
+    { title: 'GIẢI PHÁP DỤNG CỤ CHO DOANH NGHIỆP', imageUrl: '/assets/home/04fae.png', linkUrl: '/danh-muc', placement: 'business', sortOrder: 1 },
+  ];
+  if (await prisma.banner.count() === 0) await prisma.banner.createMany({ data: banners });
+  const pages = [
+    { slug: 'gioi-thieu', title: 'Giới thiệu', html: '<p>LEE\'s tools cung cấp dụng cụ và thiết bị chính hãng cho mọi công việc.</p>' },
+    { slug: 'lien-he', title: 'Liên hệ', html: '<p>Liên hệ LEE\'s tools để được tư vấn sản phẩm phù hợp.</p>' },
+  ];
+  if (await prisma.page.count() === 0) await prisma.page.createMany({ data: pages });
+  if (await prisma.siteSettings.count() === 0) await prisma.siteSettings.create({ data: { id: 1, address: '1234, Q1, TPHCM', hotlines: [{ label: 'Miền Bắc', numbers: ['19001001'] }, { label: 'Miền Trung', numbers: ['19001001'] }, { label: 'Miền Nam', numbers: ['19001001'] }, { label: 'Bảo hành', numbers: ['19001001'] }], email: 'contact@leestools.vn', mapEmbedUrl: 'https://www.google.com/maps', stores: [{ name: 'Cửa hàng TP.HCM', address: '1234, Q1, TPHCM' }] } });
+  if (await prisma.popup.count() === 0) await prisma.popup.create({ data: { id: 1, title: 'Ưu đãi mới', html: '<p>Chào mừng bạn đến với LEE\'s tools.</p>', isEnabled: false, version: 1 } });
 }
