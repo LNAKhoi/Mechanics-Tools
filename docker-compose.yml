@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lee
+      POSTGRES_PASSWORD: lee_dev_password
+      POSTGRES_DB: lee_tools
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - lee_tools_pgdata:/var/lib/postgresql/data
+
+volumes:
+  lee_tools_pgdata:

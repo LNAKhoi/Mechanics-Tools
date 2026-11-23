@@ -2,7 +2,8 @@
 title: 'Phase 2: self-managed backend — catalog API (A) and admin auth with protected product writes (B)'
 type: 'feature'
 created: '2026-11-23'
-status: 'draft'
+status: 'done'
+baseline_commit: '54090ab6b637b08f704ea1ee102c7d557c46113e'
 route: 'dispatch'
 review_loop_iteration: 0
 context: ['{project-root}/_bmad-output/specs/spec-lee-tools-storefront/SPEC.md', '{project-root}/_bmad-output/specs/spec-lee-tools-storefront/stack.md']
@@ -62,38 +63,38 @@ context: ['{project-root}/_bmad-output/specs/spec-lee-tools-storefront/SPEC.md',
 ## Tasks & Acceptance
 
 **Execution, Part A:**
-- [ ] `docker-compose.yml`: PostgreSQL 16 on port 5432 with a named volume.
-- [ ] `server/` (own `package.json` and `tsconfig.json`): Express app; `npm run dev`, `build` and `test` scripts. Root scripts `dev:server` and `db:up`.
-- [ ] `server/prisma/schema.prisma`:
+- [x] `docker-compose.yml`: PostgreSQL 16 on port 5432 with a named volume.
+- [x] `server/` (own `package.json` and `tsconfig.json`): Express app; `npm run dev`, `build` and `test` scripts. Root scripts `dev:server` and `db:up`.
+- [x] `server/prisma/schema.prisma`:
   - `Category` (slug, name, sortOrder)
   - `Product` (slug, name, brand, sku, description, price Int, stock Int, isBestseller, specs Json, categoryId)
   - `ProductImage` (url, sortOrder)
   - Initial migration.
-- [ ] `server/prisma/seed.ts`: 6 categories from `categoryTiles` and the 4 distinct mock products with their prices; images point to the existing `/assets/...` paths.
-- [ ] `server/src/routes/catalog.ts`:
+- [x] `server/prisma/seed.ts`: 6 categories from `categoryTiles` and the 4 distinct mock products with their prices; images point to the existing `/assets/...` paths.
+- [x] `server/src/routes/catalog.ts`:
   - `GET /api/categories`
   - `GET /api/products` with `q` (case-insensitive name/brand/sku), `category`, `page` and `limit`
   - `GET /api/products/:slug`
   - A public serializer that omits `price`.
-- [ ] `src/lib/api.ts` plus hooks; wire Home, Category, Product, ProductCard and Header search; loading, empty and error states.
-- [ ] `server/test/catalog.test.ts` (Vitest + supertest against a test database): covers the A rows of the matrix, including asserting that the `price` key is absent.
+- [x] `src/lib/api.ts` plus hooks; wire Home, Category, Product, ProductCard and Header search; loading, empty and error states.
+- [x] `server/test/catalog.test.ts` (Vitest + supertest against a test database): covers the A rows of the matrix, including asserting that the `price` key is absent.
 
 **Execution, Part B:**
-- [ ] Prisma:
+- [x] Prisma:
   - `AdminUser` (email unique, name, passwordHash, roleId, isActive)
   - `Role` (name, permissions String[])
   - `Session` (id, adminUserId, expiresAt)
   - Seed roles `super_admin` (`*`) and `product_manager` (`products:write`, `categories:write`).
-- [ ] `server/src/auth/`:
+- [x] `server/src/auth/`:
   - bcrypt hashing.
   - `POST /api/admin/auth/login`, `logout` and `GET me`.
   - Session cookie expires after 7 days.
   - `requireAdmin` and `requirePermission(p)` middleware.
   - `express-rate-limit` on login.
-- [ ] `server/src/routes/admin-catalog.ts`: `POST`, `PUT` and `DELETE /api/admin/products` and `/api/admin/categories`, guarded and validated with zod. Delete is refused for a category that still has products.
-- [ ] `server/scripts/create-admin.ts` (`npm run create-admin`): prompts for email, name and a hidden password; creates a `super_admin`.
-- [ ] `server/test/admin.test.ts`: covers the B rows of the matrix.
-- [ ] `README.md`: setup steps (`db:up`, migrate, seed, create-admin, run both servers).
+- [x] `server/src/routes/admin-catalog.ts`: `POST`, `PUT` and `DELETE /api/admin/products` and `/api/admin/categories`, guarded and validated with zod. Delete is refused for a category that still has products.
+- [x] `server/scripts/create-admin.ts` (`npm run create-admin`): prompts for email, name and a hidden password; creates a `super_admin`.
+- [x] `server/test/admin.test.ts`: covers the B rows of the matrix.
+- [x] `README.md`: setup steps (`db:up`, migrate, seed, create-admin, run both servers).
 
 **Acceptance Criteria:**
 - Given Docker and the seeded database, when `npm run dev` and `npm run dev:server` run, then Home, Category and Product show seeded products, and typing "Makita" in the header search lists only matching products.
@@ -102,9 +103,63 @@ context: ['{project-root}/_bmad-output/specs/spec-lee-tools-storefront/SPEC.md',
 
 ## Implementation Notes
 
+- Migrations are split: `init_catalog` (Part A) and `admin_auth` (Part B).
+- Tests: `globalSetup` runs `prisma migrate deploy` on `TEST_DATABASE_URL` (Prisma refuses `migrate reset` when run by an AI agent), then each test file truncates and re-seeds its tables. `vitest.config.ts` refuses to run if `TEST_DATABASE_URL` equals `DATABASE_URL`.
+- Session ids are the SHA-256 of the cookie token; bcrypt is via `bcryptjs` (cost 12, pure JS, no native build on Windows).
+- Admin write paths use numeric ids (`/api/admin/products/:id`, `/api/admin/categories/:id`); product bodies reference the category by `categorySlug`. Duplicate slug/sku gives 409.
+- Root `.gitignore` gained `!.env.example` so `server/.env.example` is committed.
+
 ## Spec Change Log
 
 ## Review Triage Log
+
+Layers: B = blind, E = edge-case, V = verification-gap (pre-verified).
+
+| # | Layer | Finding | Verdict | Evidence | Route |
+|---|---|---|---|---|---|
+| 1 | B | Home category rows show identical products | medium | Baseline Home also passed the same `products` to every row; pre-existing | defer |
+| 2 | B | Makita seed specs contradict description (brushed vs BL, 355mm, 2000w) | medium | Copied from old mock ProductInfo into seed-data.ts; now shown as product data | patch |
+| 3 | B | Static variants/promo/rating on every product | false | Frozen Code Map decision: rating, variants, Khuyến Mãi stay static | reject |
+| 4 | B | Out-of-stock product still addable/buyable | medium | ProductInfo shows "Hết hàng" but buttons stay enabled | patch |
+| 5 | B | No admin read endpoints (GET list/detail with price, ids) | medium | Not in frozen intent; needed by Phase 3 admin UI | defer |
+| 6 | B+E | Login limiter per-IP only; trust proxy unset | medium | Local-only today (all traffic 127.0.0.1); matters at hosting | defer |
+| 7 | B+E | Expired sessions never purged | low | session.ts deletes only on presentation | patch |
+| 8 | B | Deactivated admin's sessions revive on reactivation | low | No deactivation endpoint exists yet | defer (with 5) |
+| 9 | B | Search not diacritic-insensitive | medium | `contains` + insensitive handles case only; Vietnamese users type unaccented | defer |
+| 10 | B | Image URLs unvalidated | low | zod `string().max(500)` accepts any scheme | patch |
+| 11 | B | No-image products render broken `<img>` | low | API returns `image: null` / `images: []`; UI has no fallback | patch |
+| 12 | B | Gallery "+N" hides images 6+ | low | Seed has ≤5 images; cosmetic, fix adds UI | reject |
+| 13 | B+E+V | Related fallback request error hides good results | low | `error = sameCategory.error ?? fallback.error` | patch |
+| 14 | B+E | Category unknown slug / page beyond range show empty state | low | Rare URL-typed paths; fix adds branches | defer |
+| 15 | B | Cart items price 0 shows 0đ | false | Phase 1 removed all formatVnd from cart/checkout; PriceLabel shows "Liên Hệ" | reject |
+| 16 | B | Postgres exposed on all interfaces with hardcoded password | medium | compose `"5432:5432"` | patch |
+| 17 | B | README omits test DB setup | low | README covers DATABASE_URL only | patch |
+| 18 | B+V | Missing tests (409 on update, unknown categorySlug, secure cookie, etc.) | medium (pre-verified) | See V rows | patch |
+| 19 | B | PUT is partial (PATCH semantics) undocumented | low | Omitted fields kept | patch (README) |
+| 20 | V | Viewer 403 on PUT/DELETE categories untested | medium | admin.test.ts covers products + POST category only | patch |
+| 21 | V | skipSuccessfulRequests untested | medium | Rate-limit test uses only failures | patch |
+| 22 | V | Secure cookie flag in production untested | medium | NODE_ENV forced to test | patch |
+| 23 | V | Pagination order/distinctness untested | medium | Test asserts sizes only | patch |
+| 24 | V | PUT partial paths untested | medium | Only one PUT test | patch |
+| 25 | V+E | Storefront/API-down behavior has no automated test | medium | No frontend test setup; verified manually in browser | defer |
+| 26 | E | price/stock/sortOrder > INT4 → 500 | low | zod has no max | patch |
+| 27 | E | `:id` > INT4 → 500 | low | coerce without max | patch |
+| 28 | E | huge `page` → 500 | low | skip overflows | patch |
+| 29 | E | Category deleted mid-request → P2003 500 | low | Race; unlikely; fix adds branch | reject |
+| 30 | E | create-admin accepts password/email login rejects | medium | Login caps 200/254; script doesn't | patch |
+| 31 | E | bcrypt truncates >72 bytes | medium | bcryptjs truncation; Vietnamese chars multi-byte | patch |
+| 32 | E | `dist` path segment breaks uploadsDir | low | Unlikely checkout path; fix adds logic | reject |
+| 33 | E | Non-numeric PORT crashes start | low | Dev config error fails loudly | reject |
+| 34 | E | Missing upload 404 has misleading message | low | Cosmetic | reject |
+| 35 | E | Unknown /api/admin/* returns 401 not 404 | false | Hiding admin surface from anonymous callers is acceptable behavior | reject |
+| 36 | E | Test-DB guard compares raw URL strings | medium | localhost vs 127.0.0.1 bypasses; TRUNCATE could wipe dev DB | patch |
+| 37 | E | Re-seed reverts admin edits | medium | `upsert update: data` + image replace | patch |
+| 38 | E | Seed aborts on sku conflict with admin product | low | Unlikely; loud failure | reject |
+| 39 | E | Stale success overwrites newer useApi state | medium | api.ts:50 success path lacks abort check | patch |
+| 40 | E | `?page=2.5` mislabels page | low | Direct floor fix | patch |
+| 41 | E | Categories error hides filter silently | low | Unlikely; adds branch | reject |
+| 42 | E | Duplicate spec labels collide React keys | low | Direct key fix | patch |
+| 43 | V | `limit>100` falls back to 20 | low | Defensible; no harm | reject |
 
 ## Design Notes
 

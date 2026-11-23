@@ -33,6 +33,16 @@ main section[class*="mt-[24px]"][class*="border-t"]::after {
   background-position: center;
   background-size: 24px;
 }
+
+.admin-shell, .admin-login { min-width: 0; max-width: 1200px; margin: 32px auto; padding: 24px; font-family: system-ui, sans-serif; }
+.admin-shell nav { display: flex; gap: 16px; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 16px; margin-bottom: 24px; }
+.admin-shell nav button { margin-left: auto; }
+.admin-shell table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+.admin-shell th, .admin-shell td { text-align: left; border-bottom: 1px solid #ddd; padding: 10px; }
+.admin-form, .admin-login form { display: grid; gap: 12px; max-width: 620px; padding: 20px; margin: 20px 0; border: 1px solid #ddd; }
+.admin-form label, .admin-login label { display: grid; gap: 4px; }
+.admin-form input, .admin-form select, .admin-form textarea, .admin-login input { padding: 8px; }
+.admin-error { color: #b00020; }
 main section[class*="mt-[24px]"][class*="border-t"]::before {
   right: 64px;
   border: 1.5px solid rgba(111, 113, 118, .2);
