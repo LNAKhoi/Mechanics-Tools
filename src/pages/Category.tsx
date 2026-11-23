@@ -1,23 +1,23 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { ProductCard } from '../components/ProductCard';
 import { categoryProducts } from '../data/products';
 
-const prices = ['Tất cả', 'Từ 500 vnd - 1 triệu vnd', 'Từ 1 triệu vnd - 2 triệu vnd', 'Từ 2 triệu vnd - 3 triệu vnd', 'Từ 5 triệu vnd - 10 triệu vnd'];
 const groups = ['Tất cả', 'Máy khoan & bắt vít (22)', 'Máy mài & máy cắt (22)', 'Máy cưa & gia công gỗ (22)', 'Máy & dụng cụ cơ khí (22)', 'Taro & dụng cụ tạo ren (22)', 'Phụ kiện dụng cụ (22)'];
 
 export default function Category() {
-  return <Layout><main className="bg-page px-[72px] pb-[24px] pt-[24px]"><div className="page-container"><nav className="flex gap-[12px] text-[16px] font-bold"><span>Trang chủ</span><span>&gt;</span><span className="text-xam underline">Máy khoan & bắt vít</span></nav><div className="mt-[24px] flex h-[40px] items-center justify-between"><h1 className="font-chakra text-[28px] leading-none">Danh mục</h1><SortBar /></div><div className="mt-[24px] flex items-start gap-[24px]"><Filters /><section className="w-[1476px]"><div className="grid grid-cols-5 gap-[24px]">{categoryProducts.map((product, index) => <ProductCard product={product} key={index} />)}</div><Pagination /></section></div></div></main></Layout>;
+  return <Layout><main className="bg-page px-[72px] pb-[24px] pt-[24px]"><div className="page-container"><nav className="flex gap-[12px] text-[16px] font-bold"><Link to="/">Trang chủ</Link><span>&gt;</span><span className="text-xam underline">Máy khoan & bắt vít</span></nav><div className="mt-[24px] flex h-[40px] items-center justify-between"><h1 className="font-chakra text-[28px] leading-none">Danh mục</h1><SortBar /></div><div className="mt-[24px] flex items-start gap-[24px]"><Filters /><section className="w-[1476px]"><div className="grid grid-cols-5 gap-[24px]">{categoryProducts.map((product, index) => <ProductCard product={product} key={index} />)}</div><Pagination /></section></div></div></main></Layout>;
 }
 
 function Filters() {
-  return <aside className="relative w-[276px] shrink-0"><div className="absolute right-[4px] top-0 h-[806px] w-[4px] rounded-full bg-input"><i className="block h-[32px] w-full rounded-full bg-xam" /></div><div className="pr-[36px]"><FilterGroup title="Khoảng giá" items={prices} initial={0} /><div className="my-[16px] border-t border-xam20" /><FilterGroup title="Danh mục" items={groups} initial={1} category /><button className="mt-[16px] text-[14px] font-medium text-red">Xem thêm &gt;</button><button className="mt-[48px] flex w-full flex-col items-center gap-[4px] text-[14px] font-medium text-red"><Chevron direction="up" color="#D70114" />Thu gọn</button></div></aside>;
+  return <aside className="relative w-[276px] shrink-0"><div className="absolute bottom-0 right-[4px] top-0 w-[4px] rounded-full bg-input"><i className="block h-[32px] w-full rounded-full bg-xam" /></div><div className="pr-[36px]"><FilterGroup title="Danh mục" items={groups} initial={1} /><button className="mt-[16px] text-[14px] font-medium text-red">Xem thêm &gt;</button><button className="mt-[48px] flex w-full flex-col items-center gap-[4px] text-[14px] font-medium text-red"><Chevron direction="up" color="#D70114" />Thu gọn</button></div></aside>;
 }
 
-function FilterGroup({ title, items, initial, category = false }: { title: string; items: string[]; initial: number; category?: boolean }) {
+function FilterGroup({ title, items, initial }: { title: string; items: string[]; initial: number }) {
   const [checked, setChecked] = useState(() => new Set([initial]));
   const toggle = (index: number) => setChecked(current => { const next = new Set(current); next.has(index) ? next.delete(index) : next.add(index); return next; });
-  return <section><h2 className="flex items-center justify-between text-[22px] font-bold leading-none">{title}<Chevron color="#D70114" /></h2><div className="mt-[28px] space-y-[20px]">{items.map((item, index) => <label key={item} className={`flex cursor-pointer items-center gap-[8px] text-[16px] font-bold leading-none ${checked.has(index) ? 'text-red' : ''}`}><input className="sr-only" type="checkbox" checked={checked.has(index)} onChange={() => toggle(index)} /><span className={`size-[16px] rounded-[5px] border ${checked.has(index) ? 'border-red bg-red' : 'border-xam'}`} />{item}</label>)}</div>{!category && <><p className="mt-[20px] text-[14px] leading-none text-xam">Hoặc nhập khoảng giá phù hợp<br />với bạn:</p><div className="mt-[8px] flex items-center gap-[8px]"><span className="h-[40px] rounded-[8px] border border-xam20 bg-input px-[8px] pt-[11px] text-[14px]">5.000.000 đ</span><b>~</b><span className="h-[40px] rounded-[8px] border border-xam20 bg-input px-[8px] pt-[11px] text-[14px]">10.000.000 đ</span></div></>}</section>;
+  return <section><h2 className="flex items-center justify-between text-[22px] font-bold leading-none">{title}<Chevron color="#D70114" /></h2><div className="mt-[28px] space-y-[20px]">{items.map((item, index) => <label key={item} className={`flex cursor-pointer items-center gap-[8px] text-[16px] font-bold leading-none ${checked.has(index) ? 'text-red' : ''}`}><input className="sr-only" type="checkbox" checked={checked.has(index)} onChange={() => toggle(index)} /><span className={`size-[16px] rounded-[5px] border ${checked.has(index) ? 'border-red bg-red' : 'border-xam'}`} />{item}</label>)}</div></section>;
 }
 
 function SortBar() {

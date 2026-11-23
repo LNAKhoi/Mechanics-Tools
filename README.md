@@ -18,8 +18,7 @@ Build for production with `npm run build` (output in `dist/`).
 | `/danh-muc` | Category listing |
 | `/san-pham` | Product detail |
 | `/gio-hang` | Cart |
-| `/thanh-toan` | Checkout |
-| `/thanh-toan/hoa-don` | Checkout with VAT invoice form |
+| `/thanh-toan` | Order form (ordering not yet active) |
 | `/dang-nhap` | Login |
 | `/dang-ky` | Register |
 | `/tai-khoan` | Account |

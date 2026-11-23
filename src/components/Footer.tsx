@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Logo } from './Logo';
 
 const stores = ['Cửa hàng TP.HCM', 'Cửa hàng Huế', 'Cửa hàng Đà Nẵng', 'Cửa hàng Đà Lạt'];
-const support = ['Giới thiệu', 'Tư vấn kết nối', 'Tin khuyến mãi', 'Hướng dẫn thanh toán', 'Hướng dẫn thành viên', 'Các hình thức mua hàng'];
+const support = ['Giới thiệu', 'Tư vấn kết nối', 'Tin khuyến mãi', 'Hướng dẫn thành viên', 'Các hình thức mua hàng'];
 const policies = ['Chính sách và quy định chung', 'Chính sách bảo hành sản phẩm', 'Chính sách bảo mật thông tin', 'Chính sách vận chuyển', 'Quy trình giao hàng', 'Chính sách đổi trả'];
 const hotlines = [{ label: 'Miền Bắc', numbers: ['19001001', '19001001'] }, { label: 'Miền Trung', numbers: ['19001001'] }, { label: 'Miền Nam', numbers: ['19001001'] }, { label: 'Bảo hành', numbers: ['19001001'] }];
 

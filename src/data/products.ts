@@ -3,15 +3,15 @@ export type Product = {
   price: string;
   oldPrice?: string;
   image: string;
-  badges?: ('Bán chạy' | 'Giảm 30%')[];
+  badges?: 'Bán chạy'[];
 };
 
 export const products: Product[] = [
   { name: 'Máy khoan và vặn vít dùng pin 18V Makita', price: '6.994.000đ', image: '/assets/home/3c819.png', badges: ['Bán chạy'] },
-  { name: 'mũi khoan carbide ngắn Ø6,3 mm', price: '5.270.000đ', oldPrice: '7.200.000đ', image: '/assets/home/cc545.png', badges: ['Bán chạy', 'Giảm 30%'] },
-  { name: 'Máy siết bu lông dùng pin Milwaukee M18', price: '5.270.000đ', oldPrice: '7.200.000đ', image: '/assets/home/8f51b.png', badges: ['Giảm 30%'] },
+  { name: 'mũi khoan carbide ngắn Ø6,3 mm', price: '5.270.000đ', oldPrice: '7.200.000đ', image: '/assets/home/cc545.png', badges: ['Bán chạy'] },
+  { name: 'Máy siết bu lông dùng pin Milwaukee M18', price: '5.270.000đ', oldPrice: '7.200.000đ', image: '/assets/home/8f51b.png' },
   { name: 'Máy mài góc Bosch 100 mm', price: '5.270.000đ', oldPrice: '7.200.000đ', image: '/assets/home/9c44c.png' },
-  { name: 'mũi khoan carbide ngắn Ø6,3 mm', price: '5.270.000đ', oldPrice: '7.200.000đ', image: '/assets/home/cc545.png', badges: ['Bán chạy', 'Giảm 30%'] },
+  { name: 'mũi khoan carbide ngắn Ø6,3 mm', price: '5.270.000đ', oldPrice: '7.200.000đ', image: '/assets/home/cc545.png', badges: ['Bán chạy'] },
 ];
 
 export const recommendedProducts = [...products, products[0]];
