@@ -1,6 +1,6 @@
 ---
 id: SPEC-lee-tools-storefront
-companions: [brownfield.md]
+companions: [brownfield.md, stack.md]
 sources: [../../../features.md]
 ---
 
