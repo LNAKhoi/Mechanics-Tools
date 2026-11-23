@@ -45,3 +45,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-phase4-content-management.md`
   summary: Fill in the owner's real Zalo (https://zalo.me/...) and Facebook Messenger (https://m.me/...) links in /quan-tri once confirmed; until then the chat bubbles fall back to /lien-he.
   evidence: Khoi 2026-11-23 has not yet obtained the owner's Zalo/Facebook; Phase 4 ships a temporary version with empty links.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-phase5-discovery-and-seo.md`
+  summary: Hosting phase - serve per-page Open Graph tags from the server so Zalo/Facebook link previews show the product title and image.
+  evidence: Khoi chose 2026-11-23 to defer; the SPA sets meta client-side only, which link-preview crawlers don't execute.

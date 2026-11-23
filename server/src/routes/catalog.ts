@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../db.js';
 import { publicCategory, publicProductDetail, publicProductSummary } from '../serializers.js';
@@ -27,14 +27,35 @@ catalogRouter.get('/products', async (req, res) => {
     return;
   }
   const { q, category, page, limit } = parsed.data;
-  const where: Prisma.ProductWhereInput = {
-    ...(category ? { category: { slug: category } } : {}),
-    ...(q ? { OR: (['name', 'brand', 'sku'] as const).map(field => ({ [field]: { contains: q, mode: 'insensitive' } })) } : {}),
-  };
-  const [total, products] = await Promise.all([
-    prisma.product.count({ where }),
-    prisma.product.findMany({ where, include, orderBy: [{ isBestseller: 'desc' }, { id: 'asc' }], skip: (page - 1) * limit, take: limit }),
+  // `unaccent` is installed by the accompanying Prisma migration.  Use it in
+  // SQL rather than normalizing in JavaScript so filtering and pagination stay
+  // in PostgreSQL and work for rows added by administrators.
+  const categoryCondition = category ? Prisma.sql`AND c."slug" = ${category}` : Prisma.empty;
+  const searchCondition = q ? Prisma.sql`AND (
+    unaccent(lower(p."name")) LIKE '%' || unaccent(lower(${q})) || '%'
+    OR unaccent(lower(p."brand")) LIKE '%' || unaccent(lower(${q})) || '%'
+    OR unaccent(lower(p."sku")) LIKE '%' || unaccent(lower(${q})) || '%'
+  )` : Prisma.empty;
+  const [count, ids] = await Promise.all([
+    prisma.$queryRaw<{ total: number }[]>(Prisma.sql`
+      SELECT COUNT(*)::integer AS total
+      FROM "Product" p
+      INNER JOIN "Category" c ON c.id = p."categoryId"
+      WHERE TRUE ${categoryCondition} ${searchCondition}
+    `),
+    prisma.$queryRaw<{ id: number }[]>(Prisma.sql`
+      SELECT p.id
+      FROM "Product" p
+      INNER JOIN "Category" c ON c.id = p."categoryId"
+      WHERE TRUE ${categoryCondition} ${searchCondition}
+      ORDER BY p."isBestseller" DESC, p.id ASC
+      OFFSET ${(page - 1) * limit} LIMIT ${limit}
+    `),
   ]);
+  const records = ids.length ? await prisma.product.findMany({ where: { id: { in: ids.map(row => row.id) } }, include }) : [];
+  const byId = new Map(records.map(product => [product.id, product]));
+  const products = ids.map(row => byId.get(row.id)!).filter(Boolean);
+  const total = count[0]?.total ?? 0;
   res.json({ items: products.map(publicProductSummary), total, page, limit });
 });
 

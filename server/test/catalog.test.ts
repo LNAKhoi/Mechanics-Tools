@@ -45,6 +45,22 @@ describe('GET /api/products', () => {
     expect(bySku.body.items.map((item: { slug: string }) => item.slug)).toEqual(['may-khoan-van-vit-dung-pin-18v-makita']);
   });
 
+  it('matches Vietnamese text without accents, including đ and uppercase input', async () => {
+    const grinder = await request(app).get('/api/products').query({ q: 'MAY MAI' }).expect(200);
+    expect(grinder.body.items.map((item: { slug: string }) => item.slug)).toEqual(['may-mai-goc-bosch-100-mm']);
+    const category = await prisma.category.findUniqueOrThrow({ where: { slug: 'may-mai-may-cat' } });
+    const toolProduct = await prisma.product.create({ data: { slug: 'dung-cu-thu-nghiem', name: 'Dụng cụ thử nghiệm', brand: 'LEE', sku: 'DC-TEST', price: 0, categoryId: category.id } });
+    const stoneProduct = await prisma.product.create({ data: { slug: 'da-cat-thu-nghiem', name: 'Đá cắt thử nghiệm', brand: 'LEE', sku: 'DA-TEST', price: 0, categoryId: category.id } });
+    try {
+      const tools = await request(app).get('/api/products').query({ q: 'DUNG CU' }).expect(200);
+      expect(tools.body.items.map((item: { slug: string }) => item.slug)).toContain(toolProduct.slug);
+      const stone = await request(app).get('/api/products').query({ q: 'ĐÁ' }).expect(200);
+      expect(stone.body.items.map((item: { slug: string }) => item.slug)).toContain(stoneProduct.slug);
+    } finally {
+      await prisma.product.deleteMany({ where: { id: { in: [toolProduct.id, stoneProduct.id] } } });
+    }
+  });
+
   it('returns an empty list for an unknown category', async () => {
     const res = await request(app).get('/api/products').query({ category: 'khong-ton-tai' }).expect(200);
     expect(res.body).toMatchObject({ items: [], total: 0 });

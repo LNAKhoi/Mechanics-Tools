@@ -9,6 +9,7 @@ import { adminUsersRouter } from './routes/admin-users.js';
 import { catalogRouter } from './routes/catalog.js';
 import { contentRouter } from './routes/content.js';
 import { adminContentRouter } from './routes/admin-content.js';
+import { seoRouter } from './routes/seo.js';
 
 // server/uploads, both from src/ (tsx) and dist/src/ (compiled).
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -22,6 +23,7 @@ export function createApp() {
   app.use(cookieParser());
 
   app.use('/uploads', express.static(uploadsDir, { fallthrough: false }));
+  app.use(seoRouter);
   app.use('/api/admin/auth', createAuthRouter());
   app.use('/api/admin', adminCatalogRouter);
   app.use('/api/admin', adminUploadRouter);

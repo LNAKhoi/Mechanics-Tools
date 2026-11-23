@@ -3,6 +3,7 @@ import { EmptyState, ErrorState, LoadingState } from '../components/ApiStatus';
 import { Layout } from '../components/Layout';
 import { ProductCard } from '../components/ProductCard';
 import { useCategories, useProducts, type Category as CategoryItem } from '../lib/api';
+import { useSeo } from '../lib/seo';
 
 const PAGE_SIZE = 20;
 
@@ -16,7 +17,12 @@ export default function Category() {
   const current = categories.data?.find(category => category.slug === slug);
   const crumb = q ? `Kết quả tìm kiếm: "${q}"` : current?.name ?? (slug ? 'Danh mục' : 'Tất cả sản phẩm');
   const total = products.data?.total ?? 0;
-  return <Layout><main className="bg-page px-[72px] pb-[24px] pt-[24px]"><div className="page-container"><nav className="flex gap-[12px] text-[16px] font-bold"><Link to="/">Trang chủ</Link><span>&gt;</span><span className="text-xam underline">{crumb}</span></nav><div className="mt-[24px] flex h-[40px] items-center justify-between"><h1 className="font-chakra text-[28px] leading-none">Danh mục</h1><SortBar page={page} total={total} count={products.data?.items.length ?? 0} /></div><div className="mt-[24px] flex items-start gap-[24px]"><Filters categories={categories.data ?? []} selected={slug} q={q} /><section className="w-[1476px]">{products.error ? <ErrorState onRetry={() => { products.retry(); if (categories.error) categories.retry(); }} /> : products.loading ? <LoadingState /> : products.data!.items.length === 0 ? <EmptyState>{q ? `Không tìm thấy sản phẩm phù hợp với "${q}".` : 'Chưa có sản phẩm trong danh mục này.'}</EmptyState> : <><div className="grid grid-cols-5 gap-[24px]">{products.data!.items.map(product => <ProductCard product={product} key={product.slug} />)}</div><Pagination page={page} pageCount={Math.ceil(total / PAGE_SIZE)} /></>}</section></div></div></main></Layout>;
+  const unknownCategory = Boolean(slug && categories.data && !current);
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const pageOutOfRange = Boolean(products.data && !unknownCategory && page > pageCount);
+  const pageOne = withQuery(slug ? `/danh-muc/${slug}` : '/danh-muc', q);
+  useSeo({ title: unknownCategory ? 'Không tìm thấy danh mục' : pageOutOfRange ? 'Trang không tồn tại' : q ? 'Kết quả tìm kiếm' : current?.name ?? 'Danh mục', description: q ? `Kết quả tìm kiếm sản phẩm cho ${q} tại LEE's tools.` : `Khám phá ${current?.name ?? 'danh mục dụng cụ'} tại LEE's tools.`, canonical: slug ? `/danh-muc/${slug}` : '/danh-muc' });
+  return <Layout><main className="bg-page px-[72px] pb-[24px] pt-[24px]"><div className="page-container"><nav className="flex gap-[12px] text-[16px] font-bold"><Link to="/">Trang chủ</Link><span>&gt;</span><span className="text-xam underline">{crumb}</span></nav><div className="mt-[24px] flex h-[40px] items-center justify-between"><h1 className="font-chakra text-[28px] leading-none">Danh mục</h1><SortBar page={page} total={total} count={products.data?.items.length ?? 0} /></div><div className="mt-[24px] flex items-start gap-[24px]"><Filters categories={categories.data ?? []} selected={slug} q={q} /><section className="w-[1476px]">{unknownCategory ? <EmptyState><p className="font-chakra text-[28px] text-den">Không tìm thấy danh mục</p><Link to="/danh-muc" className="mt-[12px] inline-block font-bold text-red">Xem danh mục</Link></EmptyState> : products.error ? <ErrorState onRetry={() => { products.retry(); if (categories.error) categories.retry(); }} /> : products.loading ? <LoadingState /> : pageOutOfRange ? <EmptyState><p className="font-chakra text-[28px] text-den">Trang không tồn tại</p><Link to={pageOne} className="mt-[12px] inline-block font-bold text-red">Về trang 1</Link></EmptyState> : products.data!.items.length === 0 ? <EmptyState>{q ? `Không tìm thấy sản phẩm phù hợp với "${q}".` : 'Chưa có sản phẩm trong danh mục này.'}</EmptyState> : <><div className="grid grid-cols-5 gap-[24px]">{products.data!.items.map(product => <ProductCard product={product} key={product.slug} />)}</div><Pagination page={page} pageCount={pageCount} /></>}</section></div></div></main></Layout>;
 }
 
 const withQuery = (path: string, q: string) => q ? `${path}?q=${encodeURIComponent(q)}` : path;

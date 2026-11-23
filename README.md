@@ -42,6 +42,8 @@ npm run dev:server   # API on http://localhost:4000
 npm run dev          # storefront on http://localhost:5173 (proxies /api and /uploads to the API)
 ```
 
+Set `SITE_URL` in `server/.env` to the public storefront origin when hosting (it defaults to `http://localhost:5173`). The API uses it for `/sitemap.xml` and `/robots.txt`.
+
 ## Tests and builds
 
 The API tests use a separate database, `TEST_DATABASE_URL` in `server/.env` (default `lee_tools_test` on the same Docker Postgres). It must name a different database than `DATABASE_URL`: every run empties its tables, and the tests refuse to start if the two database names match. `npm test` applies the migrations to it with `prisma migrate deploy`, which creates `lee_tools_test` if it is missing. If your database user cannot create databases, create it once yourself:
@@ -69,6 +71,7 @@ Public (no `price` in any response):
 | `GET /api/content/pages/:slug` | Public About (`gioi-thieu`) or Contact (`lien-he`) page |
 | `GET /api/content/site` | Store, hotline, contact and chat-link settings |
 | `GET /api/content/popup` | Enabled popup inside its configured schedule, otherwise `null` |
+| `GET /sitemap.xml`, `GET /robots.txt` | Public discovery files; `SITE_URL` supplies their absolute URLs |
 
 Admin (HTTP-only `lee_admin_session` cookie, valid 7 days):
 

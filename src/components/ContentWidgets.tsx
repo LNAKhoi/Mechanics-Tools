@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useContentPage, usePopup, useSite } from '../lib/api';
+import { useSeo } from '../lib/seo';
 
 export function ChatBubbles() {
   const site = useSite();
@@ -43,6 +44,7 @@ export function ContentPageView({ slug }: { slug: 'gioi-thieu' | 'lien-he' }) {
   const site = useSite();
   const fallback = slug === 'gioi-thieu' ? { title: 'Giới thiệu', html: '<p>LEE\'s tools cung cấp dụng cụ và thiết bị chính hãng cho mọi công việc.</p>' } : { title: 'Liên hệ', html: '<p>Liên hệ LEE\'s tools để được tư vấn sản phẩm phù hợp.</p>' };
   const page = content.data ?? fallback;
+  useSeo({ title: page.title, description: `${page.title} — LEE's tools cung cấp dụng cụ và thiết bị chính hãng.`, canonical: `/${slug}` });
   const contact = site.data ?? { address: '1234, Q1, TPHCM', email: 'contact@leestools.vn', hotlines: [{ label: 'Hotline', numbers: ['19001001'] }], mapEmbedUrl: 'https://www.google.com/maps' };
   return <main className="page-container py-12"><h1 className="font-chakra text-4xl">{page.title}</h1>{content.loading ? <p className="mt-4">Đang tải nội dung…</p> : <><div className="mt-6" dangerouslySetInnerHTML={{ __html: page.html }} />{content.error && <p className="mt-4 text-xam">Không thể tải nội dung mới nhất; đang hiển thị thông tin mặc định.</p>}</>}{slug === 'lien-he' && <section className="mt-6 space-y-2"><p>{contact.address}</p><p>{contact.email}</p>{contact.hotlines.map(x => <p key={x.label}>{x.label}: {x.numbers.join(', ')}</p>)}<a href={contact.mapEmbedUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-red underline">Xem bản đồ</a></section>}</main>;
 }
