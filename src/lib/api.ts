@@ -21,6 +21,8 @@ export class ApiError extends Error {
     super(message);
   }
 }
+export type OrderLookup = { code: string; status: string; deliveryOption: string; createdAt: string; items: { productId: number; slug: string; name: string; sku: string; image: string | null; quantity: number }[]; history: { from: string | null; to: string; at: string }[] };
+async function postJson<T>(path: string, body: unknown): Promise<T> { const res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body) }); if (!res.ok) { const data = await res.json().catch(() => ({})); throw new ApiError(res.status, data.error ?? 'Có lỗi xảy ra'); } return res.json(); }
 
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const res = await fetch(path, { signal, headers: { Accept: 'application/json' } });
@@ -44,6 +46,8 @@ export const api = {
   page: (slug: string, signal?: AbortSignal) => getJson<ContentPage>(`/api/content/pages/${slug}`, signal),
   site: (signal?: AbortSignal) => getJson<SiteSettings>('/api/content/site', signal),
   popup: (signal?: AbortSignal) => getJson<Popup | null>('/api/content/popup', signal),
+  createOrder: (body: unknown) => postJson<{ code: string }>('/api/orders', body),
+  lookupOrder: (code: string, phone: string) => postJson<OrderLookup>('/api/orders/lookup', { code, phone }),
 };
 
 export type AsyncState<T> = { data: T | undefined; error: Error | undefined; loading: boolean; retry: () => void };

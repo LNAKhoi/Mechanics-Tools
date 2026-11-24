@@ -77,6 +77,7 @@ export const seedRoles = [
   { name: 'super_admin', permissions: ['*'] },
   { name: 'product_manager', permissions: ['products:write', 'categories:write'] },
   { name: 'content_editor', permissions: ['content:write'] },
+  { name: 'order_manager', permissions: ['orders:read', 'orders:write', 'customers:read'] },
 ];
 
 /** Upserts roles. Safe to run repeatedly. */

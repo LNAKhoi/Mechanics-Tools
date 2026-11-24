@@ -38,6 +38,7 @@ main section[class*="mt-[24px]"][class*="border-t"]::after {
 
 @media (max-width: 1279px) {
   main { overflow-x: clip; }
+  body.product-purchase-bar-open .chat-bubbles { bottom: calc(76px + 1rem); }
   [class~="px-[72px]"] { padding-left: 16px; padding-right: 16px; }
   [class~="w-[1476px]"], [class~="w-[1176px]"], [class~="w-[876px]"], [class~="w-[726px]"], [class~="w-[576px]"] { width: 100%; max-width: 100%; }
   [class~="h-[726px]"] { height: auto; }

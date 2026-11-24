@@ -10,6 +10,8 @@ import { catalogRouter } from './routes/catalog.js';
 import { contentRouter } from './routes/content.js';
 import { adminContentRouter } from './routes/admin-content.js';
 import { seoRouter } from './routes/seo.js';
+import { createOrdersRouter } from './routes/orders.js';
+import { adminOrdersRouter } from './routes/admin-orders.js';
 
 // server/uploads, both from src/ (tsx) and dist/src/ (compiled).
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -28,9 +30,11 @@ export function createApp() {
   app.use('/api/admin', adminCatalogRouter);
   app.use('/api/admin', adminUploadRouter);
   app.use('/api/admin', adminContentRouter);
+  app.use('/api/admin', adminOrdersRouter);
   // Content editors must reach these routes before the super-admin-only users router.
   app.use('/api/admin', adminUsersRouter);
   app.use('/api', catalogRouter);
+  app.use('/api', createOrdersRouter());
   app.use('/api', contentRouter);
 
   app.use('/api', (_req, res) => {

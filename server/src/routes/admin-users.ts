@@ -5,7 +5,10 @@ import { prisma } from '../db.js';
 
 const idParam = z.coerce.number().int().positive();
 export const adminUsersRouter = Router();
-adminUsersRouter.use(requireAdmin, requirePermission('*'));
+// Only protect this router's own paths; it shares the /api/admin mount point
+// with the catalog, content, upload, and orders routers.
+adminUsersRouter.use('/roles', requireAdmin, requirePermission('*'));
+adminUsersRouter.use('/users', requireAdmin, requirePermission('*'));
 
 adminUsersRouter.get('/roles', async (_req, res) => {
   const roles = await prisma.role.findMany({ orderBy: { id: 'asc' } });

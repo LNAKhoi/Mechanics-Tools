@@ -18,7 +18,10 @@ const popup = z.object({ title: text(200), html, imageUrl: image.optional().null
 const invalid = (res: Response, error: z.ZodError) => res.status(400).json({ error: 'Dữ liệu không hợp lệ', fieldErrors: error.flatten().fieldErrors });
 
 export const adminContentRouter = Router();
-adminContentRouter.use(requireAdmin, requirePermission('content:write'));
+// This router is mounted at /api/admin alongside other admin routers. Scope the
+// guard to content routes so it does not reject requests intended for routers
+// mounted after this one.
+adminContentRouter.use('/content', requireAdmin, requirePermission('content:write'));
 adminContentRouter.get('/content/banners', async (_req, res) => res.json({ items: await prisma.banner.findMany({ orderBy: [{ placement: 'asc' }, { sortOrder: 'asc' }, { id: 'asc' }] }) }));
 adminContentRouter.post('/content/banners', async (req, res) => { const parsed = banner.safeParse(req.body); if (!parsed.success) return invalid(res, parsed.error); res.status(201).json(await prisma.banner.create({ data: parsed.data })); });
 adminContentRouter.put('/content/banners/:id', async (req, res) => { const id = z.coerce.number().int().positive().safeParse(req.params.id); const parsed = banner.partial().safeParse(req.body); if (!id.success) return void res.status(404).json({ error: 'Không tìm thấy' }); if (!parsed.success) return invalid(res, parsed.error); try { res.json(await prisma.banner.update({ where: { id: id.data }, data: parsed.data })); } catch { res.status(404).json({ error: 'Không tìm thấy' }); } });

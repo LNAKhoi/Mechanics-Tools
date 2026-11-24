@@ -65,8 +65,68 @@ model AdminUser {
   role         Role      @relation(fields: [roleId], references: [id], onDelete: Restrict)
   isActive     Boolean   @default(true)
   sessions     Session[]
+  orderEvents  OrderStatusEvent[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  phone     String   @unique
+  name      String
+  email     String?
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id             Int                @id @default(autoincrement())
+  code           String             @unique
+  customerId     Int
+  customer       Customer           @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  province       String
+  ward           String
+  address        String
+  deliveryOption String
+  note           String?
+  status         String             @default("moi")
+  quotedTotal    Int?
+  adminNote      String?
+  items          OrderItem[]
+  statusEvents   OrderStatusEvent[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([customerId, createdAt])
+  @@index([status, createdAt])
+}
+
+model OrderItem {
+  id        Int   @id @default(autoincrement())
+  orderId   Int
+  order     Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  slug      String
+  name      String
+  sku       String
+  image     String?
+  quantity  Int
+
+  @@index([orderId])
+}
+
+model OrderStatusEvent {
+  id          Int        @id @default(autoincrement())
+  orderId     Int
+  order       Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  from        String?
+  to          String
+  adminUserId Int?
+  adminUser   AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+  at          DateTime   @default(now())
+
+  @@index([orderId, at])
 }
 
 /// `id` is the SHA-256 hash of the cookie token, so a database leak does not leak live sessions.

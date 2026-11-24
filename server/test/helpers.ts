@@ -3,7 +3,7 @@ import { seedCatalogInto, seedContentInto, seedRolesInto } from '../prisma/seed-
 
 /** Empties every table and re-seeds roles and the catalog. */
 export async function resetDatabase() {
-  await prisma.$executeRawUnsafe('TRUNCATE "Session", "AdminUser", "Role", "ProductImage", "Product", "Category", "Banner", "Page", "SiteSettings", "Popup" RESTART IDENTITY CASCADE');
+  await prisma.$executeRawUnsafe('TRUNCATE "Session", "AdminUser", "Role", "OrderStatusEvent", "OrderItem", "Order", "Customer", "ProductImage", "Product", "Category", "Banner", "Page", "SiteSettings", "Popup" RESTART IDENTITY CASCADE');
   await seedRolesInto(prisma);
   await seedCatalogInto(prisma);
   await seedContentInto(prisma);

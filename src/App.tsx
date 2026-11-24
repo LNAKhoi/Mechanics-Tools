@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Category from './pages/Category';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
@@ -11,7 +12,10 @@ import AdminPanel from './pages/admin/AdminPanel';
 import { ContentPageView } from './components/ContentWidgets';
 import { Layout } from './components/Layout';
 import { useSeo } from './lib/seo';
+import OrderSuccess from './pages/OrderSuccess';
+import OrderLookup from './pages/OrderLookup';
 
 function NotFound() { useSeo({ title: 'Không tìm thấy trang', description: 'Trang bạn tìm không tồn tại tại LEE\'s tools.', canonical: window.location.pathname }); return <Layout><main className="page-container py-12"><h1 className="font-chakra text-4xl">Không tìm thấy trang</h1><p className="mt-4">Trang bạn tìm không tồn tại.</p></main></Layout>; }
+function StorefrontScrollToTop() { const { pathname } = useLocation(); useEffect(() => { if (!pathname.startsWith('/quan-tri')) window.scrollTo(0, 0); }, [pathname]); return null; }
 
-export default function App() { return <Routes><Route path="/quan-tri/*" element={<AdminPanel/>}/><Route path="/" element={<Home />} /><Route path="/gioi-thieu" element={<Layout><ContentPageView slug="gioi-thieu"/></Layout>}/><Route path="/lien-he" element={<Layout><ContentPageView slug="lien-he"/></Layout>}/><Route path="/danh-muc" element={<Category />} /><Route path="/danh-muc/:slug" element={<Category />} /><Route path="/san-pham" element={<Navigate to="/danh-muc" replace />} /><Route path="/san-pham/:slug" element={<Product />} /><Route path="/gio-hang" element={<Cart />} /><Route path="/thanh-toan" element={<Checkout />} /><Route path="/dang-nhap" element={<Login />} /><Route path="/dang-ky" element={<Register />} /><Route path="/tai-khoan" element={<Account />} /><Route path="*" element={<NotFound />} /></Routes>; }
+export default function App() { return <><StorefrontScrollToTop/><Routes><Route path="/quan-tri/*" element={<AdminPanel/>}/><Route path="/" element={<Home />} /><Route path="/gioi-thieu" element={<Layout><ContentPageView slug="gioi-thieu"/></Layout>}/><Route path="/lien-he" element={<Layout><ContentPageView slug="lien-he"/></Layout>}/><Route path="/danh-muc" element={<Category />} /><Route path="/danh-muc/:slug" element={<Category />} /><Route path="/san-pham" element={<Navigate to="/danh-muc" replace />} /><Route path="/san-pham/:slug" element={<Product />} /><Route path="/gio-hang" element={<Cart />} /><Route path="/thanh-toan" element={<Checkout />} /><Route path="/dat-hang-thanh-cong" element={<OrderSuccess/>}/><Route path="/tra-cuu-don-hang" element={<OrderLookup/>}/><Route path="/dang-nhap" element={<Login />} /><Route path="/dang-ky" element={<Register />} /><Route path="/tai-khoan" element={<Account />} /><Route path="*" element={<NotFound />} /></Routes></>; }

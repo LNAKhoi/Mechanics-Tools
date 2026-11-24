@@ -71,6 +71,8 @@ Public (no `price` in any response):
 | `GET /api/content/pages/:slug` | Public About (`gioi-thieu`) or Contact (`lien-he`) page |
 | `GET /api/content/site` | Store, hotline, contact and chat-link settings |
 | `GET /api/content/popup` | Enabled popup inside its configured schedule, otherwise `null` |
+| `POST /api/orders` | Guest quote request; accepts contact, delivery details and 1–50 product lines; returns only `{ code }` |
+| `POST /api/orders/lookup` | Lookup by order code and phone; returns status, timeline and product snapshots only |
 | `GET /sitemap.xml`, `GET /robots.txt` | Public discovery files; `SITE_URL` supplies their absolute URLs |
 
 Admin (HTTP-only `lee_admin_session` cookie, valid 7 days):
@@ -85,11 +87,14 @@ Admin (HTTP-only `lee_admin_session` cookie, valid 7 days):
 | `POST /api/admin/uploads` | `products:write`; PNG/JPEG/WebP request body, maximum 5 MB; saves a generated name in `server/uploads` |
 | `GET`/`POST`/`PUT`/`DELETE /api/admin/content/banners...` | `content:write` |
 | `GET`/`PUT /api/admin/content/pages/:slug`, `/site`, `/popup` | `content:write`; HTML is sanitized on save and each popup save increments its version |
+| `GET /api/admin/orders`, `GET /api/admin/orders/:id` | `orders:read` |
+| `PUT /api/admin/orders/:id` | `orders:write` |
+| `GET /api/admin/customers`, `GET /api/admin/customers/:id` | `customers:read` |
 | `GET /api/admin/users`, `GET /api/admin/roles`, `POST /api/admin/users/:id/deactivate` | super-admin only; deactivation removes all sessions immediately |
 
 `PUT` is a partial update: send only the fields to change, and omitted fields keep their values. Sending `images` replaces the whole image list. Image URLs must start with `/assets/` or `/uploads/`, or be http(s) URLs.
 
-Roles are data: `super_admin` has `*`, `product_manager` has `products:write` and `categories:write`, and `content_editor` has `content:write`. Content editors can also use the verified image upload endpoint for banners and popups.
+Roles are data: `super_admin` has `*`, `product_manager` has `products:write` and `categories:write`, `content_editor` has `content:write`, and `order_manager` has `orders:read`, `orders:write`, and `customers:read`. Content editors can also use the verified image upload endpoint for banners and popups.
 
 ## Routes
 

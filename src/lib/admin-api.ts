@@ -5,6 +5,9 @@ export type AdminUser = { id: number; email: string; name: string; role: string;
 export type Role = { id: number; name: string; permissions: string[] };
 export type AdminBanner = { id: number; title: string; imageUrl: string; linkUrl: string | null; placement: 'hero' | 'business'; sortOrder: number; isEnabled: boolean };
 export type AdminPage = { slug: string; title: string; html: string };
+export type AdminOrderItem = { id?: number; name: string; slug?: string; sku?: string; image?: string | null; quantity: number };
+export type AdminOrder = { id: number; code: string; status: string; createdAt: string; customer: { id?: number; name: string; phone: string; email?: string | null }; items: AdminOrderItem[]; province?: string; ward?: string; address?: string; deliveryOption?: string; note?: string | null; quotedTotal?: number | null; adminNote?: string | null; history?: { from: string; to: string; at: string; admin?: { id: number; name: string; email: string } | null }[] };
+export type AdminCustomer = { id: number; name: string; phone: string; orderCount: number; lastOrderAt: string | null };
 
 export class AdminApiError extends Error { constructor(public status: number, message: string, public fieldErrors?: Record<string, string[]>) { super(message); } }
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -20,5 +23,7 @@ export const adminApi = {
   users: () => request<{ items: AdminUser[] }>('/users'), roles: () => request<{ items: Role[] }>('/roles'), deactivate: (id: number) => request<void>(`/users/${id}/deactivate`, { method: 'POST' }),
   contentBanners: () => request<{ items: AdminBanner[] }>('/content/banners'), createBanner: (body: unknown) => request<AdminBanner>('/content/banners', { method: 'POST', body: JSON.stringify(body) }), updateBanner: (id: number, body: unknown) => request<AdminBanner>(`/content/banners/${id}`, { method: 'PUT', body: JSON.stringify(body) }), deleteBanner: (id: number) => request<void>(`/content/banners/${id}`, { method: 'DELETE' }),
   contentPage: (slug: string) => request<AdminPage>(`/content/pages/${slug}`), updateContentPage: (slug: string, body: unknown) => request<AdminPage>(`/content/pages/${slug}`, { method: 'PUT', body: JSON.stringify(body) }),
+  orders: (q = '', status = '', page = 1, limit = 20) => request<{ items: AdminOrder[]; total: number; page: number; limit: number; newCount: number }>(`/orders?${new URLSearchParams({ q, status, page: String(page), limit: String(limit) }).toString()}`), order: (id: number) => request<AdminOrder>(`/orders/${id}`), updateOrder: (id: number, body: unknown) => request<AdminOrder>(`/orders/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  customers: (q = '', page = 1, limit = 20) => request<{ items: AdminCustomer[]; total: number; page: number; limit: number }>(`/customers?${new URLSearchParams({ q, page: String(page), limit: String(limit) }).toString()}`), customer: (id: number) => request<{ id: number; name: string; phone: string; email?: string | null; orders: AdminOrder[] }>(`/customers/${id}`),
   site: () => request<Record<string, unknown>>('/content/site'), updateSite: (body: unknown) => request<Record<string, unknown>>('/content/site', { method: 'PUT', body: JSON.stringify(body) }), popup: () => request<Record<string, unknown>>('/content/popup'), updatePopup: (body: unknown) => request<Record<string, unknown>>('/content/popup', { method: 'PUT', body: JSON.stringify(body) }),
 };
