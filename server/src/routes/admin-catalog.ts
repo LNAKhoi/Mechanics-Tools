@@ -86,7 +86,13 @@ adminCatalogRouter.get('/products', requirePermission('products:write'), async (
   const page = positiveInt(req.query.page, 1, 100000);
   const limit = positiveInt(req.query.limit, 20, 100);
   const q = typeof req.query.q === 'string' ? req.query.q.trim().slice(0, 100) : '';
-  const where: Prisma.ProductWhereInput = q ? { OR: (['name', 'brand', 'sku'] as const).map(field => ({ [field]: { contains: q, mode: 'insensitive' } })) } : {};
+  const category = typeof req.query.category === 'string' ? req.query.category.trim() : '';
+  const stock = typeof req.query.stock === 'string' ? req.query.stock : '';
+  const where: Prisma.ProductWhereInput = {
+    ...(q ? { OR: (['name', 'brand', 'sku'] as const).map(field => ({ [field]: { contains: q, mode: 'insensitive' } })) } : {}),
+    ...(category ? { category: { slug: category } } : {}),
+    ...(stock === 'in' ? { stock: { gt: 0 } } : stock === 'out' ? { stock: 0 } : {}),
+  };
   const [total, products] = await Promise.all([
     prisma.product.count({ where }),
     prisma.product.findMany({ where, include, orderBy: { id: 'asc' }, skip: (page - 1) * limit, take: limit }),

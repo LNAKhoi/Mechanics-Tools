@@ -1,19 +1,38 @@
-import { FormEvent, useEffect, useState } from 'react';
-import { Link, Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
-import { Admin, AdminApiError, AdminOrder, adminApi } from '../../lib/admin-api';
+import { useEffect, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { Admin, adminApi } from "../../lib/admin-api";
+import { AdminLayout } from "./AdminLayout";
+import { LoginPage } from "./LoginPage";
+import { ProductsPage } from "./ProductsPage";
+import { CategoriesPage } from "./CategoriesPage";
+import { ContentPage } from "./ContentPage";
 
-const can=(admin:Admin, permission:string)=>admin.permissions.includes('*')||admin.permissions.includes(permission);
-const labels:Record<string,string>={moi:'Mới',da_lien_he:'Đã liên hệ / báo giá',da_xac_nhan:'Đã xác nhận',dang_giao:'Đang giao',hoan_thanh:'Hoàn thành',da_huy:'Đã hủy'};
-const transitions:Record<string,string[]>={moi:['da_lien_he','da_huy'],da_lien_he:['da_xac_nhan','da_huy'],da_xac_nhan:['dang_giao','da_huy'],dang_giao:['hoan_thanh','da_huy'],hoan_thanh:[],da_huy:[]};
-const when=(value:string|null|undefined)=>value?new Date(value).toLocaleString('vi-VN'):'—';
-function Notice({error,retry}:{error:unknown;retry?:()=>void}){if(!error)return null;const fields=error instanceof AdminApiError?error.fieldErrors:undefined;return <div className="admin-error"><p>{error instanceof Error?error.message:'Có lỗi xảy ra'}</p>{fields&&<ul>{Object.entries(fields).map(([name,messages])=><li key={name}>{name}: {messages.join(', ')}</li>)}</ul>}{retry&&<button type="button" onClick={retry}>Thử lại</button>}</div>}
-const Denied=()=> <section><h1>Không có quyền truy cập</h1><p>Bạn không có quyền mở trang quản trị này.</p></section>;
-function Login({onLogin}:{onLogin:(admin:Admin)=>void}){const [error,setError]=useState<unknown>(),navigate=useNavigate();const submit=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();const form=new FormData(event.currentTarget);try{onLogin(await adminApi.login(String(form.get('email')),String(form.get('password'))));navigate('/quan-tri')}catch(reason){setError(reason)}};return <main className="admin-login"><form onSubmit={submit}><h1>Đăng nhập quản trị</h1><Notice error={error}/><label>Email<input name="email" type="email" required/></label><label>Mật khẩu<input name="password" type="password" required/></label><button>Đăng nhập</button></form></main>}
-function Pager({page,total,onChange}:{page:number;total:number;onChange:(page:number)=>void}){return <p>Trang {page} / {Math.max(1,Math.ceil(total/20))} <button disabled={page===1} onClick={()=>onChange(page-1)}>Trang trước</button> <button disabled={page*20>=total} onClick={()=>onChange(page+1)}>Trang sau</button></p>}
-function Orders({onNewCount}:{onNewCount:(count:number)=>void}){const [items,setItems]=useState<AdminOrder[]>([]),[q,setQ]=useState(''),[status,setStatus]=useState(''),[page,setPage]=useState(1),[total,setTotal]=useState(0),[error,setError]=useState<unknown>();const load=()=>adminApi.orders(q,status,page).then(result=>{setItems(result.items);setTotal(result.total);onNewCount(result.newCount);setError(undefined)}).catch(setError);useEffect(()=>{void load()},[q,status,page]);return <section><h1>Đơn hàng</h1><p><input placeholder="Tìm mã đơn, điện thoại hoặc tên" value={q} onChange={event=>{setQ(event.target.value);setPage(1)}}/> <select aria-label="Lọc trạng thái" value={status} onChange={event=>{setStatus(event.target.value);setPage(1)}}><option value="">Tất cả trạng thái</option>{Object.entries(labels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></p><Notice error={error} retry={load}/><table><thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Điện thoại</th><th>Sản phẩm</th><th>Trạng thái</th><th>Ngày tạo</th></tr></thead><tbody>{items.map(order=><tr key={order.id}><td><Link to={`/quan-tri/don-hang/${order.id}`}>{order.code}</Link></td><td>{order.customer.name}</td><td>{order.customer.phone}</td><td>{order.items.reduce((count,item)=>count+item.quantity,0)}</td><td>{labels[order.status]||order.status}</td><td>{when(order.createdAt)}</td></tr>)}</tbody></table><Pager page={page} total={total} onChange={setPage}/></section>}
-function OrderUpdate({order,onSaved,onError}:{order:AdminOrder;onSaved:()=>void;onError:(error:unknown)=>void}){const [saving,setSaving]=useState(false),allowed=transitions[order.status]||[];if(!allowed.length)return null;const submit=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();const form=new FormData(event.currentTarget);setSaving(true);try{await adminApi.updateOrder(order.id,{status:String(form.get('status')),quotedTotal:form.get('quotedTotal')===''?null:Number(form.get('quotedTotal')),adminNote:String(form.get('adminNote')).trim()||null});onSaved()}catch(reason){onError(reason)}finally{setSaving(false)}};return <form className="admin-form" onSubmit={submit}><h2>Cập nhật đơn hàng</h2><label>Trạng thái<select name="status">{allowed.map(value=><option key={value} value={value}>{labels[value]}</option>)}</select></label><label>Báo giá nội bộ (VND)<input name="quotedTotal" type="number" min="0" defaultValue={order.quotedTotal??''}/></label><label>Ghi chú nội bộ<textarea name="adminNote" defaultValue={order.adminNote??''}/></label><button disabled={saving}>{saving?'Đang lưu…':'Lưu cập nhật'}</button></form>}
-function OrderDetail(){const {id}=useParams(),navigate=useNavigate(),[order,setOrder]=useState<AdminOrder>(),[error,setError]=useState<unknown>();const load=()=>adminApi.order(Number(id)).then(value=>{setOrder(value);setError(undefined)}).catch(setError);useEffect(()=>{void load()},[id]);if(!order)return <section><Notice error={error} retry={load}/><p>Đang tải…</p></section>;return <section><button onClick={()=>navigate('/quan-tri/don-hang')}>← Đơn hàng</button><h1>{order.code}</h1><Notice error={error} retry={load}/><p><b>Trạng thái:</b> {labels[order.status]||order.status}</p><h2>Khách hàng</h2><p>{order.customer.name}<br/>{order.customer.phone}<br/>{order.customer.email||'Không có email'}</p><h2>Giao hàng</h2><p>{order.address}, {order.ward}, {order.province}<br/>{order.deliveryOption==='express'?'Giao nhanh':'Giao tiêu chuẩn'}</p>{order.note&&<><h2>Ghi chú của khách</h2><p>{order.note}</p></>}<h2>Sản phẩm</h2><table><tbody>{order.items.map((item,index)=><tr key={item.id||index}><td>{item.image&&<img src={item.image} alt="" width="56"/>}</td><td>{item.name}</td><td>{item.quantity}</td></tr>)}</tbody></table><h2>Lịch sử trạng thái</h2><ul>{order.history?.map((event,index)=><li key={index}>{labels[event.from]||event.from} → {labels[event.to]||event.to} — {when(event.at)}{event.admin?` (${event.admin.name})`:''}</li>)}</ul><OrderUpdate order={order} onSaved={load} onError={setError}/></section>}
-function Customers(){const [items,setItems]=useState<Awaited<ReturnType<typeof adminApi.customers>>['items']>([]),[q,setQ]=useState(''),[page,setPage]=useState(1),[total,setTotal]=useState(0),[error,setError]=useState<unknown>();const load=()=>adminApi.customers(q,page).then(result=>{setItems(result.items);setTotal(result.total);setError(undefined)}).catch(setError);useEffect(()=>{void load()},[q,page]);return <section><h1>Khách hàng</h1><input placeholder="Tìm tên hoặc điện thoại" value={q} onChange={event=>{setQ(event.target.value);setPage(1)}}/><Notice error={error} retry={load}/><table><thead><tr><th>Tên</th><th>Điện thoại</th><th>Số đơn</th><th>Đơn gần nhất</th></tr></thead><tbody>{items.map(customer=><tr key={customer.id}><td><Link to={`/quan-tri/khach-hang/${customer.id}`}>{customer.name}</Link></td><td>{customer.phone}</td><td>{customer.orderCount}</td><td>{when(customer.lastOrderAt)}</td></tr>)}</tbody></table><Pager page={page} total={total} onChange={setPage}/></section>}
-function CustomerDetail(){const {id}=useParams(),navigate=useNavigate(),[customer,setCustomer]=useState<Awaited<ReturnType<typeof adminApi.customer>>>(),[error,setError]=useState<unknown>();const load=()=>adminApi.customer(Number(id)).then(value=>{setCustomer(value);setError(undefined)}).catch(setError);useEffect(()=>{void load()},[id]);if(!customer)return <section><Notice error={error} retry={load}/><p>Đang tải…</p></section>;return <section><button onClick={()=>navigate('/quan-tri/khach-hang')}>← Khách hàng</button><h1>{customer.name}</h1><p>{customer.phone}{customer.email&&<> · {customer.email}</>}</p><Notice error={error} retry={load}/><h2>Lịch sử đơn hàng</h2><table><thead><tr><th>Mã đơn</th><th>Trạng thái</th><th>Ngày tạo</th></tr></thead><tbody>{customer.orders.map(order=><tr key={order.id}><td><Link to={`/quan-tri/don-hang/${order.id}`}>{order.code}</Link></td><td>{labels[order.status]||order.status}</td><td>{when(order.createdAt)}</td></tr>)}</tbody></table></section>}
-function Shell({admin,onLogout}:{admin:Admin;onLogout:()=>void}){const orders=can(admin,'orders:read'),customers=can(admin,'customers:read'),[newCount,setNewCount]=useState(0);return <div className="admin-shell"><nav><b>LEE's tools — Quản trị</b>{orders&&<Link to="/quan-tri/don-hang">Đơn hàng{newCount?` (${newCount})`:''}</Link>}{customers&&<Link to="/quan-tri/khach-hang">Khách hàng</Link>}<button onClick={()=>void adminApi.logout().finally(onLogout)}>Đăng xuất</button></nav><Routes><Route index element={orders?<Orders onNewCount={setNewCount}/>:customers?<Customers/>:<Denied/>}/><Route path="don-hang" element={orders?<Orders onNewCount={setNewCount}/>:<Denied/>}/><Route path="don-hang/:id" element={orders?<OrderDetail/>:<Denied/>}/><Route path="khach-hang" element={customers?<Customers/>:<Denied/>}/><Route path="khach-hang/:id" element={customers?<CustomerDetail/>:<Denied/>}/></Routes></div>}
-export default function AdminPanel(){const [admin,setAdmin]=useState<Admin|null|undefined>(undefined);useEffect(()=>{const expired=()=>setAdmin(null);window.addEventListener('admin:unauthorized',expired);void adminApi.me().then(setAdmin).catch(()=>setAdmin(null));return()=>window.removeEventListener('admin:unauthorized',expired)},[]);if(admin===undefined)return <p>Đang kiểm tra phiên…</p>;if(!admin)return <Routes><Route path="dang-nhap" element={<Login onLogin={setAdmin}/>}/><Route path="*" element={<Navigate to="dang-nhap" replace/>}/></Routes>;return <Routes><Route path="*" element={<Shell admin={admin} onLogout={()=>setAdmin(null)}/>}/></Routes>}
+export default function AdminPanel() {
+  const [admin, setAdmin] = useState<Admin | null | undefined>();
+  useEffect(() => {
+    void adminApi
+      .me()
+      .then(setAdmin)
+      .catch(() => setAdmin(null));
+  }, []);
+  if (admin === undefined) return <p>Đang kiểm tra phiên…</p>;
+  if (!admin)
+    return (
+      <Routes>
+        <Route path="dang-nhap" element={<LoginPage onLogin={setAdmin} />} />
+        <Route path="*" element={<Navigate to="dang-nhap" replace />} />
+      </Routes>
+    );
+  return (
+    <Routes>
+      <Route
+        element={<AdminLayout admin={admin} onLogout={() => setAdmin(null)} />}
+      >
+        <Route index element={<ProductsPage />} />
+        <Route path="danh-muc" element={<CategoriesPage />} />
+        <Route path="noi-dung" element={<ContentPage />} />
+        <Route path="*" element={<Navigate to="." replace />} />
+      </Route>
+    </Routes>
+  );
+}

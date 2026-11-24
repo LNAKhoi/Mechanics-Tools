@@ -96,6 +96,10 @@ Admin (HTTP-only `lee_admin_session` cookie, valid 7 days):
 
 Roles are data: `super_admin` has `*`, `product_manager` has `products:write` and `categories:write`, `content_editor` has `content:write`, and `order_manager` has `orders:read`, `orders:write`, and `customers:read`. Content editors can also use the verified image upload endpoint for banners and popups.
 
+## Nhập sản phẩm bằng Excel
+
+Trong Quản trị → Sản phẩm, tải [File mẫu](/templates/mau-nhap-san-pham.xlsx), điền sheet **Sản phẩm**, rồi chọn **Nhập Excel**. SKU được so khớp không phân biệt hoa thường: SKU mới được thêm, SKU có sẵn chỉ cập nhật các ô có giá trị. Có thể chọn ảnh riêng hoặc ZIP cùng lần tải lên; cột Ảnh dùng tên tệp (phân cách `;`) hoặc liên kết `https://`. Bản xem trước báo lỗi theo dòng và chỉ lưu sau khi xác nhận.
+
 ## Routes
 
 | Route | Screen |

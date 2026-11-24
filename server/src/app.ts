@@ -1,10 +1,9 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import cookieParser from 'cookie-parser';
 import express, { type ErrorRequestHandler } from 'express';
 import { createAuthRouter } from './auth/routes.js';
 import { adminCatalogRouter } from './routes/admin-catalog.js';
 import { adminUploadRouter } from './routes/admin-upload.js';
+import { adminImportRouter } from './routes/admin-import.js';
 import { adminUsersRouter } from './routes/admin-users.js';
 import { catalogRouter } from './routes/catalog.js';
 import { contentRouter } from './routes/content.js';
@@ -12,10 +11,9 @@ import { adminContentRouter } from './routes/admin-content.js';
 import { seoRouter } from './routes/seo.js';
 import { createOrdersRouter } from './routes/orders.js';
 import { adminOrdersRouter } from './routes/admin-orders.js';
+import { uploadsDir } from './paths.js';
 
-// server/uploads, both from src/ (tsx) and dist/src/ (compiled).
-const here = path.dirname(fileURLToPath(import.meta.url));
-export const uploadsDir = path.resolve(here, here.includes(`${path.sep}dist${path.sep}`) ? '../../uploads' : '../uploads');
+export { uploadsDir } from './paths.js';
 
 /** Builds a fresh app (with fresh rate-limit state), so tests get isolated instances. */
 export function createApp() {
@@ -29,6 +27,7 @@ export function createApp() {
   app.use('/api/admin/auth', createAuthRouter());
   app.use('/api/admin', adminCatalogRouter);
   app.use('/api/admin', adminUploadRouter);
+  app.use('/api/admin', adminImportRouter);
   app.use('/api/admin', adminContentRouter);
   app.use('/api/admin', adminOrdersRouter);
   // Content editors must reach these routes before the super-admin-only users router.

@@ -4,9 +4,10 @@ import path from 'node:path';
 import { Router } from 'express';
 import express from 'express';
 import { requireAdmin, requirePermission } from '../auth/middleware.js';
-import { uploadsDir } from '../app.js';
+import { uploadsDir } from '../paths.js';
 
-const imageType = (type: string | undefined, b: Buffer) => {
+/** Shared signature check; multipart import deliberately does not trust file extensions/MIME types. */
+export const imageType = (type: string | undefined, b: Buffer) => {
   if (type === 'image/png' && b.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) return '.png';
   if (type === 'image/jpeg' && b.length > 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return '.jpg';
   if (type === 'image/webp' && b.length > 12 && b.subarray(0, 4).toString() === 'RIFF' && b.subarray(8, 12).toString() === 'WEBP') return '.webp';
