@@ -49,3 +49,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-phase5-discovery-and-seo.md`
   summary: Hosting phase - serve per-page Open Graph tags from the server so Zalo/Facebook link previews show the product title and image.
   evidence: Khoi chose 2026-11-23 to defer; the SPA sets meta client-side only, which link-preview crawlers don't execute.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-phase8-admin-products-excel.md`
+  summary: Import tests leave staged uploads in server/.import-staging (cleanup only runs on expiry); tests should remove their staging dirs in afterEach, and the folder could live under the OS temp dir.
+  evidence: 25 leftover test images were found (and briefly committed in 27ad7dd, untracked in 294c878).
