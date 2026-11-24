@@ -120,3 +120,11 @@ Trong Quản trị → Sản phẩm, tải [File mẫu](/templates/mau-nhap-san-
 ## Deploy on Vercel
 
 Framework preset: Vite · Build command: `npm run build` · Output directory: `dist`. `vercel.json` rewrites all paths to `index.html` for client-side routing. The API is not deployed yet (hosting is a later phase).
+
+## Demo on Vercel + Render + Neon
+
+1. Create a Neon project in the Singapore region and copy its direct (non-pooled) connection string.
+2. In Render, select **New** → **Blueprint** → this repository, then paste `DATABASE_URL` and set `SITE_URL` to the Vercel URL.
+3. If Render assigns a URL other than `https://lee-tools-api.onrender.com`, update `vercel.json`.
+4. To create the first admin, from a local terminal with `DATABASE_URL` set to the Neon connection string, run `npm --prefix server run create-admin`.
+5. Limitations: Render's free plan sleeps after idle (allow about 50 seconds for the first request), and uploads are not persistent.
